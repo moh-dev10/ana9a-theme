@@ -1,0 +1,15 @@
+# Node modules (هذا أهم واحد، حجمه كبير بزاف وما نرفعوهش)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# WordPress sensitive files (للاحتياط)
+wp-config.php
+*.log
+
+# Tailwind / Build files
+.sass-cache/
+.parcel-cache/
+dist/
