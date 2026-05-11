@@ -4,6 +4,11 @@
     <div class="absolute inset-0 z-0">
         <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/heroImg.webp')?>"
          alt="Hero Image"
+         fetchpriority="high"
+         loading="eager"
+         decoding="async"
+         width="1920"
+         hight="1080"
          class="w-full h-full object-cover object-center grayscale opacity-50"
          >
          <div class="absolute inset-0 bg-white/20"></div>
@@ -15,7 +20,7 @@
             <div class="max-w-4xl space-y-12">
 
                    <header class="space-y-6">
-                       <div class="flex items-center gap-4 animate-fade-in">
+                       <div class="flex items-center gap-4 ">
                            <span class="w-10 h-px bg-brand-black"></span>
                            <span class="text-xs md:text-sm uppercase tracking-[0.3em] font-bold text-brand-gray-500">
                                <?php _e('New Collection 2026', 'ana9a');?>

@@ -5,8 +5,10 @@
 @source "./*.php";                    /* root PHP files: index.php, header.php, etc. */
 @source "./template-parts/**/*.php";  /* template-parts subfolder */
 @source "./inc/**/*.php";             /* inc subfolder if you have PHP there */
+@source "./**/*.php"; /* catch-all for any PHP files in theme, adjust as needed */
 
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
+
+@import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" );
 
 @theme {
   --color-brand-black: #050505;
@@ -19,7 +21,7 @@
   --tracking-tightest: -0.06em;
   --tracking-widest: 0.3em;
   
-  --font-family-sans: 'Cairo', sans-serif;
+  --font-family-sans: 'Tajawal', sans-serif;
 
   --animate-reveal: reveal 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards;
   
@@ -30,13 +32,14 @@
 }
 
 @layer base {
+  
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    @apply bg-white text-brand-black antialiased overflow-x-hidden;
+    @apply bg-white font-sans text-brand-black antialiased overflow-x-hidden;
   }
 
   a {
