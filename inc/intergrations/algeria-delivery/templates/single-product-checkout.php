@@ -22,11 +22,11 @@ $prices  = get_option( 'algeria_delivery_prices', [] );
     <!-- Main Card Container -->
     <div class="bg-white max-w-2xl rounded-[15px] border-2  border-brand-black py-6 px-5 ">
         
-        <h2 class="text-center font-bold text-[1.1rem] mb-5 text-gray-800">
+        <h2 id="qmc-title" class="text-center font-bold text-[1.1rem] mb-5 text-gray-800">
             أملأ الاستمارة للطلب السريع
         </h2>
 
-        <form id="qmc-form" class="space-y-6" novalidate>
+        <form id="qmc-form" class="main-order-form space-y-6" novalidate>
             <?php wp_nonce_field( 'algeria_delivery_nonce', 'opc_nonce' ); ?>
             <input type="hidden" name="product_id"    value="<?php echo esc_attr( $product->get_id() ); ?>">
             <input type="hidden" name="variation_id"  id="opc_variation_id"  value="">
@@ -106,45 +106,96 @@ $prices  = get_option( 'algeria_delivery_prices', [] );
                 </label>
             </div>
 
-            <?php if ( $product->is_type( 'variable' ) ) : ?>
-            <div class="qmc-variations-wrap">
-                <?php
-                $attributes = $product->get_variation_attributes();
-                foreach ( $attributes as $attr_name => $options ) :
-                    $attr_label = wc_attribute_label( $attr_name );
-                    $attr_key   = 'attribute_' . sanitize_title( $attr_name );
-                    $is_color   = preg_match( '/color|colour|loun|لون/i', $attr_name );
-                ?>
-                <div class="qmc-attr-row">
-                    <span class="qmc-attr-label"><?php echo esc_html( $attr_label ); ?></span>
-                    <div class="qmc-attr-options" data-attr="<?php echo esc_attr( $attr_key ); ?>">
-                        <?php foreach ( $options as $opt ) :
-                            $term  = get_term_by( 'slug', $opt, $attr_name );
-                            $label = $term ? $term->name : $opt;
-                            $color = $term ? get_term_meta( $term->term_id, 'product_attribute_color', true ) : '';
-                            if ( $is_color ) : ?>
-                                <button type="button"
-                                    class="qmc-swatch<?php echo $color ? '' : ' qmc-swatch-text'; ?>"
-                                    data-value="<?php echo esc_attr( $opt ); ?>"
-                                    <?php if ( $color ) echo 'style="background:' . esc_attr($color) . '"'; ?>
-                                    title="<?php echo esc_attr($label); ?>">
-                                    <?php if ( ! $color ) echo esc_html( $label ); ?>
-                                </button>
-                            <?php else : ?>
-                                <button type="button" class="qmc-size-btn"
-                                    data-value="<?php echo esc_attr( $opt ); ?>">
-                                    <?php echo esc_html( strtoupper( $label ) ); ?>
-                                </button>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </div>
-                    <input type="hidden" class="qmc-attr-val"
-                           name="<?php echo esc_attr( $attr_key ); ?>"
-                           data-attr="<?php echo esc_attr( $attr_key ); ?>" value="">
-                </div>
-                <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
+<?php if ( $product->is_type( 'variable' ) ) : ?>
+<div class="flex flex-col gap-4 py-2 border-t border-gray-100">
+    <?php
+    $attributes = $product->get_variation_attributes();
+    foreach ( $attributes as $attr_name => $options ) :
+        $attr_label = wc_attribute_label( $attr_name );
+        $attr_key   = 'attribute_' . sanitize_title( $attr_name );
+        $is_color   = preg_match( '/color|colour|loun|لون/i', $attr_name );
+    ?>
+    <div class="flex flex-col gap-2">
+
+        <div class="flex items-center gap-2">
+            <span class="text-[10px] text-gray-400 uppercase tracking-wider">
+                <?php echo esc_html( $attr_label ); ?>
+            </span>
+            <span class="qmc-attr-label text-[10px] font-semibold text-gray-800"
+                  data-attr="<?php echo esc_attr( $attr_key ); ?>"></span>
+        </div>
+
+        <div class="qmc-attr-options flex flex-wrap gap-2"
+             data-attr="<?php echo esc_attr( $attr_key ); ?>">
+
+            <?php foreach ( $options as $opt ) :
+                $term  = get_term_by( 'slug', $opt, $attr_name );
+                $label = $term ? $term->name : $opt;
+                $color = $term
+                       ? get_term_meta( $term->term_id, 'product_attribute_color', true )
+                       : '';
+
+                if ( $is_color && $color ) : ?>
+
+                    <!-- Color swatch — round filled circle -->
+                    <button type="button"
+                       data-value="<?php echo esc_attr( $opt ); ?>"
+                       data-label="<?php echo esc_attr( $label ); ?>"
+                       title="<?php echo esc_attr( $label ); ?>"
+                       style="background-color:<?php echo esc_attr( $color ); ?>;"
+                       class="qmc-swatch w-9 h-9 rounded-full border-2 border-white
+                              ring-2 ring-gray-200 hover:ring-gray-400
+                              aria-pressed:swatch-active
+                              transition-all duration-200 cursor-pointer"
+                       aria-pressed="false">
+                   </button>
+
+                <?php elseif ( $is_color ) : ?>
+
+                    <!-- Color swatch fallback — no hex available -->
+                    <button type="button"
+                        data-value="<?php echo esc_attr( $opt ); ?>"
+                        data-label="<?php echo esc_attr( $label ); ?>"
+                        title="<?php echo esc_attr( $label ); ?>"
+                        class="qmc-swatch px-3 py-1 rounded-full text-xs font-semibold
+                               border border-gray-300 bg-white text-gray-700
+                               hover:border-gray-400
+                               aria-pressed:btn-active
+                               transition-all duration-200 cursor-pointer"
+                        aria-pressed="false">
+                        <?php echo esc_html( $label ); ?>
+                    </button>
+
+                <?php else : ?>
+
+                    <!-- Size / generic attribute button -->
+                    <button type="button"
+                    data-value="<?php echo esc_attr( $opt ); ?>"
+                    data-label="<?php echo esc_attr( $label ); ?>"
+                    class="qmc-size-btn min-w-[2.75rem] h-10 px-3
+                           flex items-center justify-center
+                           rounded-lg border border-gray-300 bg-white
+                           text-sm font-bold text-gray-700
+                           hover:border-gray-400
+                           aria-pressed:btn-active
+                           transition-all duration-200 cursor-pointer"
+                    aria-pressed="false">
+                    <?php echo esc_html( strtoupper( $label ) ); ?>
+                </button>
+
+                <?php endif; ?>
+            <?php endforeach; ?>
+
+        </div>
+
+        <input type="hidden" class="qmc-attr-val"
+               name="<?php echo esc_attr( $attr_key ); ?>"
+               data-attr="<?php echo esc_attr( $attr_key ); ?>"
+               value="">
+    </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
 
             <!-- Summary -->
             <div class="qmc-summary flex flex-col gap-1">
@@ -182,7 +233,7 @@ $prices  = get_option( 'algeria_delivery_prices', [] );
 <div id="qmc-success" style="display:none;" class="flex flex-col items-center justify-center text-center p-10 bg-white rounded-[30px]">
     
     <!-- Modern Animated Circle Check -->
-    <div class="relative mb-8">
+    <div class="relative mb-8 animate-success">
         <!-- Outer Glow/Pulse -->
         <div class="absolute inset-0 rounded-full bg-green-500/20 animate-ping duration-300"></div>
         
@@ -202,8 +253,8 @@ $prices  = get_option( 'algeria_delivery_prices', [] );
     </div>
 
     <!-- Typography -->
-    <h3 class="text-3xl font-black text-gray-900 mb-3 tracking-tight">تم استلام طلبك!</h3>
-    <p class="text-gray-500 max-w-[280px] mx-auto leading-relaxed mb-8">
+    <h3 class="text-3xl font-black text-gray-900 mb-3 tracking-tight reveal-on-scroll">تم استلام طلبك!</h3>
+    <p class="text-gray-500 max-w-[280px] mx-auto leading-relaxed mb-8 reveal-on-scroll">
 تم تأكيد طلبك. سنتصل بك قريباً للتأكيد.  </p>
 
     <!-- Order Summary Badge -->
@@ -216,8 +267,8 @@ $prices  = get_option( 'algeria_delivery_prices', [] );
     </div>
 
     <!-- Primary Action -->
-    <button onclick="window.location.reload()" 
-            class="flex items-center justify-center  bg-brand-black text-white px-10 py-4 rounded-xl font-bold transition-all hover:bg-gray-800 active:scale-95 shadow-lg shadow-black/10">
+    <button onclick="window.location.href='<?php echo esc_url(wc_get_page_permalink('shop')); ?>'" 
+            class="flex items-center justify-center  bg-brand-black text-white px-10 py-4 rounded-xl font-bold transition-all hover:bg-gray-800 active:scale-95 shadow-lg shadow-black/10 cursor-pointer">
                   تسوق المزيد
     </button>
 </div>
@@ -228,114 +279,335 @@ $prices  = get_option( 'algeria_delivery_prices', [] );
 
 <script>
 (function($){
-    var OPC={
-        basePrice:<?php echo floatval($product->get_price()); ?>,
-        qty:1,shippingCost:0,
-        allCommunes:<?php echo json_encode(Algeria_Data::get_communes()); ?>,
-        hasVariations:<?php echo $product->is_type('variable')?'true':'false'; ?>,
-        fmt:function(n){return parseFloat(n).toLocaleString('ar-DZ',{maximumFractionDigits:0})+' دج';},
-        init:function(){this.bindWilaya();this.bindDelivery();this.bindQty();this.bindVariations();this.bindSubmit();this.updateTotals();},
-        bindWilaya:function(){
-            $(document).on('change','#opc_wilaya',function(){
-                var $opt=$(this).find('option:selected'),w=$(this).val();
-                var $com=$('#opc_commune');
+    // جلب رابط AJAX ديناميكياً ليتوافق مع السيرفر المحلي أو الحي تلقائياً
+    var ajaxUrl = '<?php echo admin_url("admin-ajax.php"); ?>';
+
+    var OPC = {
+        basePrice: <?php echo floatval($product->get_price()); ?>,
+        qty: 1,
+        shippingCost: 0,
+        allCommunes: <?php echo json_encode(Algeria_Data::get_communes()); ?>,
+        hasVariations: <?php echo $product->is_type('variable') ? 'true' : 'false'; ?>,
+        selectedAttrs: {},
+
+        fmt: function(n){
+            return parseFloat(n).toLocaleString('ar-DZ', {maximumFractionDigits: 0}) + ' دج';
+        },
+
+        init: function(){
+            this.bindWilaya();
+            this.bindDelivery();
+            this.bindQty();
+            this.bindVariations();
+            this.bindSubmit();
+            this.updateTotals();
+            
+            if (this.hasVariations) {
+                // الفحص المبدئي عند تحميل الصفحة لأول مرة
+                this.updateSwatchesStockStatus();
+            }
+        },
+
+        bindWilaya: function(){
+            $(document).on('change', '#opc_wilaya', function(){
+                var $opt = $(this).find('option:selected'), w = $(this).val();
+                var $com = $('#opc_commune');
                 $com.html('<option value="">اختر البلدية</option>');
-                var list=(OPC.allCommunes&&OPC.allCommunes[w])?OPC.allCommunes[w]:[];
-                $.each(list,function(i,c){$com.append($('<option>',{value:c,text:c}));});
-                $com.prop('disabled',!list.length);
+                var list = (OPC.allCommunes && OPC.allCommunes[w]) ? OPC.allCommunes[w] : [];
+                $.each(list, function(i, c){ $com.append($('<option>', {value: c, text: c})); });
+                $com.prop('disabled', !list.length);
                 OPC.updateShipping($opt);
             });
         },
-        updateShipping:function($opt){
-            var type=$('#opc_delivery_type').val()||'home';
-            if(!$opt||!$opt.val()){OPC.shippingCost=0;$('.qmc-shipping-val').text('اختر الولاية ومكان التوصيل');}
-            else{OPC.shippingCost=parseFloat($opt.data(type))||0;$('.qmc-shipping-val').text(OPC.fmt(OPC.shippingCost));}
+
+        updateShipping: function($opt){
+            var type = $('#opc_delivery_type').val() || 'home';
+            if (!$opt || !$opt.val()){
+                OPC.shippingCost = 0;
+                $('.qmc-shipping-val').text('اختر الولاية ومكان التوصيل');
+            } else {
+                OPC.shippingCost = parseFloat($opt.data(type)) || 0;
+                $('.qmc-shipping-val').text(OPC.fmt(OPC.shippingCost));
+            }
             OPC.updateTotals();
         },
-        bindDelivery:function(){
-            $(document).on('change','input[name="_qmc_delivery_ui"]',function(){
+
+        bindDelivery: function(){
+            $(document).on('change', 'input[name="_qmc_delivery_ui"]', function(){
                 $('#opc_delivery_type').val($(this).val());
                 OPC.updateShipping($('#opc_wilaya option:selected'));
             });
         },
-        bindQty:function(){
-            $('#qmc-minus').on('click',function(){if(OPC.qty>1){OPC.qty--;OPC.syncQty();}});
-            $('#qmc-plus').on('click',function(){OPC.qty++;OPC.syncQty();});
+
+        bindQty: function(){
+            $('#qmc-minus').on('click', function(){ if (OPC.qty > 1){ OPC.qty--; OPC.syncQty(); } });
+            $('#qmc-plus').on('click', function(){ OPC.qty++; OPC.syncQty(); });
         },
-        syncQty:function(){$('#opc_quantity').val(OPC.qty);$('#qmc-qty-display').text(OPC.qty);OPC.updateTotals();},
-        updateTotals:function(){
-            var sub=OPC.basePrice*OPC.qty,total=sub+OPC.shippingCost;
+
+        syncQty: function(){
+            $('#opc_quantity').val(OPC.qty);
+            $('#qmc-qty-display').text(OPC.qty);
+            OPC.updateTotals();
+        },
+
+        updateTotals: function(){
+            var sub = OPC.basePrice * OPC.qty, total = sub + OPC.shippingCost;
             $('.qmc-product-val').text(OPC.fmt(sub));
             $('.qmc-total-val').text(OPC.fmt(total));
             $('.qmc-top-price').text(OPC.fmt(total));
         },
-        bindVariations:function(){
-            if(!OPC.hasVariations)return;
-            $(document).on('click','.qmc-swatch,.qmc-size-btn',function(){
-                var attr=$(this).closest('.qmc-attr-options').data('attr');
-                $(this).closest('.qmc-attr-options').find('.qmc-swatch,.qmc-size-btn').removeClass('active');
-                $(this).addClass('active');
-                $('input.qmc-attr-val[data-attr="'+attr+'"]').val($(this).data('value'));
-                // Try syncing WC native variation form
-                var $form=$('form.variations_form');
-                if($form.length){
-                    $('.qmc-attr-val').each(function(){
-                        $form.find('select[name="'+$(this).data('attr')+'"]').val($(this).val()).trigger('change');
+
+        bindVariations: function() {
+            if (!OPC.hasVariations) return;
+
+            $(document).on('click', '.qmc-swatch, .qmc-size-btn', function() {
+                var $btn = $(this);
+                // منع الضغط إذا كان الزر معطلاً أو نافداً
+                if ($btn.prop('disabled') || $btn.hasClass('out-of-stock-x')) return;
+
+                var $group = $btn.closest('.qmc-attr-options');
+                var attr   = $group.data('attr'); // اسم الخاصية (مثال: attribute_pa_color)
+                var val    = $btn.data('value');  // القيمة المحددة (مثال: blanc)
+                var label  = $btn.data('label') || val;
+
+                $group.find('.qmc-swatch').removeClass('swatch-active').attr('aria-pressed', 'false');
+                $group.find('.qmc-size-btn').removeClass('btn-active').attr('aria-pressed', 'false');
+
+                if ($btn.hasClass('qmc-swatch')) {
+                    $btn.addClass('swatch-active');
+                } else {
+                    $btn.addClass('btn-active');
+                }
+                $btn.attr('aria-pressed', 'true');
+
+                $('.qmc-attr-label[data-attr="' + attr + '"]').text('— ' + label);
+
+                // حفظ الخيار الحالي داخل كائن الخصائص النشطة
+                OPC.selectedAttrs[attr] = val;
+                
+                // تحديث حقول المدخلات المخفية
+                var $hiddenInput = $('input.qmc-attr-val[data-attr="' + attr + '"]');
+                if(!$hiddenInput.length) { $hiddenInput = $('input[name="' + attr + '"]'); }
+                $hiddenInput.val(val).trigger('change');
+
+                // مزامنة حقول ووكومرس الافتراضية إذا كانت موجودة بالصفحة
+                var $wcForm = $('form.variations_form');
+                if ($wcForm.length) {
+                    var $sel = $wcForm.find('select[name="' + attr + '"]');
+                    if ($sel.length) { $sel.val(val).trigger('change'); } 
+                    else { OPC.resolveVariationAjax(); }
+                } else {
+                    OPC.resolveVariationAjax();
+                }
+
+                // الكود السحري: إعادة فحص المقاسات والخيارات الأخرى بناءً على هذا التحديد فوراً!
+                OPC.updateSwatchesStockStatus();
+            });
+        },
+
+        updateSwatchesStockStatus: function() {
+            var $form = $('form.variations_form');
+            var variations = $form.length ? $form.data('product_variations') : null;
+
+            if (!variations) {
+                variations = $('[data-product_variations]').data('product_variations');
+            }
+
+            if (!variations || !variations.length) return;
+
+            // أخذ نسخة من الخيارات المحددة حالياً من طرف الزبون
+            var currentSelected = $.extend({}, OPC.selectedAttrs);
+
+            // المرور على مجموعات الخصائص (مجموعة الألوان، ومجموعة المقاسات)
+            $('.qmc-attr-options').each(function() {
+                var $container = $(this);
+                var attrKey = $container.data('attr'); 
+
+                $container.find('.qmc-swatch, .qmc-size-btn').each(function() {
+                    var $button = $(this);
+                    var buttonVal = $button.data('value');
+
+                    // اختبار افتراضي: كأن العميل قام باختيار هذا الزر بالتحديد
+                    var testSelected = $.extend({}, currentSelected);
+                    testSelected[attrKey] = buttonVal;
+
+                    var isAvailable = false;
+
+                    // مطابقة هذا الاختيار الافتراضي مع البيانات الفعلية للمخزن القادمة من ووردبريس
+                    variations.forEach(function(variation) {
+                        var match = true;
+
+                        for (var key in testSelected) {
+                            if (variation.attributes[key] !== undefined && 
+                                variation.attributes[key] !== "" && 
+                                variation.attributes[key] !== testSelected[key]) {
+                                match = false;
+                            }
+                        }
+
+                        // إذا كان المقاس متوافقاً مع اللون المختار، نفحص كميته في قاعدة البيانات
+                        if (match) {
+                            if (variation.is_purchasable && variation.is_in_stock) {
+                                // التحقق من أن الكمية ليست صفراً وليست سالبة (مثل حالة الـ -6 لديك)
+                                if (variation.max_qty !== 0 && variation.max_qty !== null) {
+                                    if (variation.max_qty > 0 || variation.max_qty === "") {
+                                        isAvailable = true;
+                                    }
+                                }
+                            }
+                        }
                     });
-                }
+
+                    // التعامل البصري الفوري وتجميد الزر في حال النفاد
+                    if (!isAvailable) {
+                        $button.prop('disabled', true);
+                        $button.addClass('out-of-stock-x');
+                        $button.attr('aria-disabled', 'true');
+                        
+                        $button.css({
+                            'position': 'relative',
+                            'opacity': '0.3',
+                            'pointer-events': 'none',
+                            'cursor': 'not-allowed',
+                            'background-color': '#f3f4f6',
+                            'color': '#9ca3af',
+                            'border-color': '#e5e7eb'
+                        });
+
+                        // إضافة خط الـ X ديناميكياً عبر الجافا سكريبت للتأكيد
+                        if (!$button.find('.x-line').length) {
+                            $button.append('<span class="x-line" style="position: absolute; top: 50%; left: 0; width: 100%; height: 1.5px; background: #ef4444; transform: rotate(-45deg); display: block; pointer-events: none;"></span>');
+                        }
+                        
+                        // إذا تم إلغاء الخيار النشط حالياً لأنه نفد، نقوم بإلغاء تحديده كأكتيف
+                        if ($button.hasClass('swatch-active') || $button.hasClass('btn-active')) {
+                            $button.removeClass('swatch-active btn-active').attr('aria-pressed', 'false');
+                            delete OPC.selectedAttrs[attrKey];
+                        }
+                    } else {
+                        // إرجاع الزر للوضعية النشطة والطبيعية في حال توفره
+                        $button.prop('disabled', false);
+                        $button.removeClass('out-of-stock-x');
+                        $button.attr('aria-disabled', 'false');
+                        $button.css({
+                            'opacity': '1',
+                            'pointer-events': 'auto',
+                            'cursor': 'pointer',
+                            'background': '',
+                            'color': '',
+                            'border-color': ''
+                        });
+                        $button.find('.x-line').remove();
+                    }
+                });
             });
         },
-        bindSubmit:function(){
-            $('#qmc-form').on('submit',function(e){
+
+        resolveVariationAjax: function(){
+            var productId = $('[name="product_id"]').val();
+            var data = { action: 'woocommerce_get_variation', product_id: productId };
+            $.each(OPC.selectedAttrs, function(attr, val){ data[attr] = val; });
+
+            $.post(ajaxUrl, data, function(variation){
+                if (variation && variation.variation_id){
+                    $('#opc_variation_id').val(variation.variation_id);
+                    if (variation.display_price){
+                        OPC.basePrice = parseFloat(variation.display_price);
+                        OPC.updateTotals();
+                    }
+                } else {
+                    $('#opc_variation_id').val('');
+                }
+            }, 'json');
+        },
+
+        bindSubmit: function(){
+            $('#qmc-form').on('submit', function(e){
                 e.preventDefault();
-                $('#qmc-error').hide().text('');
-                $('.qmc-input,.qmc-select').removeClass('err');
-                var ok=true;
-                var name=$('[name="full_name"]').val().trim();
-                var phone=$('#opc_phone').val().replace(/\s/g,'');
-                var w=$('#opc_wilaya').val(),c=$('#opc_commune').val();
-                if(!name){$('[name="full_name"]').addClass('err');ok=false;}
-                if(!/^(05|06|07)[0-9]{8}$/.test(phone)){$('#opc_phone').addClass('err');ok=false;}
-                if(!w){$('#opc_wilaya').addClass('err');ok=false;}
-                if(!c){$('#opc_commune').addClass('err');ok=false;}
-                if(OPC.hasVariations&&!$('#opc_variation_id').val()){
-                    ok=false;OPC.showErr('الرجاء اختيار جميع مواصفات المنتج');
+                var ok = true;
+                
+                if (OPC.hasVariations){
+                    var totalAttrs = $('.qmc-attr-options').length;
+                    var selectedCount = Object.keys(OPC.selectedAttrs).length;
+                    if (selectedCount < totalAttrs || !$('#opc_variation_id').val()){
+                        ok = false;
+                        alert('الرجاء اختيار مواصفات متوفرة للمنتج');
+                    }
                 }
-                if(!ok){if($('#qmc-error').is(':hidden'))OPC.showErr('الرجاء ملء جميع الحقول بشكل صحيح');return;}
-                OPC.submit(name,phone,w,c);
+                if (ok) OPC.submit();
             });
         },
-        showErr:function(msg){$('#qmc-error').text(msg).show();},
-        submit:function(fullName,phone,wilaya,commune){
-            var $btn=$('#qmc-submit');
-            $btn.prop('disabled',true);$('.qmc-btn-txt').hide();$('.qmc-btn-spin').show();
-            var parts=fullName.split(' ');
-            $.post('<?php echo admin_url("admin-ajax.php"); ?>',{
-                action:'algeria_opc_order',nonce:$('[name="opc_nonce"]').val(),
-                product_id:$('[name="product_id"]').val(),variation_id:$('#opc_variation_id').val(),
-                quantity:$('#opc_quantity').val(),first_name:parts[0]||fullName,
-                last_name:parts.slice(1).join(' ')||parts[0]||fullName,
-                phone:phone,wilaya:wilaya,commune:commune,
-                delivery_type:$('#opc_delivery_type').val()
-            },function(r){
-                if(r.success){
-                    $('#qmc-order-num').text(r.data.order_number||r.data.order_id||'');
-                    $('#qmc-form').hide();$('#qmc-success').show();
-                }else{
-                    OPC.showErr(r.data||'حدث خطأ، يرجى المحاولة مرة أخرى');
-                    $btn.prop('disabled',false);$('.qmc-btn-txt').show();$('.qmc-btn-spin').hide();
-                }
-            }).fail(function(){
-                OPC.showErr('فشل الاتصال، يرجى المحاولة مرة أخرى');
-                $btn.prop('disabled',false);$('.qmc-btn-txt').show();$('.qmc-btn-spin').hide();
-            });
+
+        submit: function(){
+    var $btn = $('#qmc-submit');
+    $btn.prop('disabled', true);
+    
+    // إظهار سبينر التحميل إن وُجد
+    $('.qmc-btn-txt').hide();
+    $('.qmc-btn-spin').show();
+    
+    $.post(ajaxUrl, {
+        action: 'algeria_opc_order',
+        nonce: $('[name="opc_nonce"]').val(),
+        product_id: $('[name="product_id"]').val(),
+        variation_id: $('#opc_variation_id').val(),
+        quantity: $('#opc_quantity').val(),
+        first_name: $('[name="full_name"]').val(),
+        phone: $('#opc_phone').val(),
+        wilaya: $('#opc_wilaya').val(),
+        commune: $('#opc_commune').val(),
+        delivery_type: $('#opc_delivery_type').val()
+    }, function(r){
+        if (r.success){
+            // 1. إخفاء نموذج الطلب تماماً
+            $('#qmc-form').hide(); 
+            $('#qmc-title').hide();
+            
+            // 2. تحديث رقم الطلب داخل حاوية النجاح إن وُجدت
+            if(r.data && (r.data.order_number || r.data.order_id)) {
+                $('#qmc-order-num').text(r.data.order_number || r.data.order_id);
+            }
+            
+            // 3. إظهار حاوية رسالة الشكر (Thank You Page / Section)
+            $('#qmc-success').show(); 
+            
+            // 4. التحديث الذكي للمخزن في الخلفية بدون عمل ريفريش يفسد تجربة المستخدم
+            // نقوم بإنقاص الكمية محلياً في مصفوفة الجافا سكريبت للتشكيلة المختار حالياً
+            var currentVarId = $('#opc_variation_id').val();
+            var $form = $('form.variations_form');
+            var variations = $form.length ? $form.data('product_variations') : null;
+            if (!variations) { variations = $('[data-product_variations]').data('product_variations'); }
+            
+            if (variations && currentVarId) {
+                variations.forEach(function(v) {
+                    if (v.variation_id == currentVarId) {
+                        if (v.max_qty !== "" && v.max_qty !== null) {
+                            v.max_qty = v.max_qty - OPC.qty; // إنقاص الكمية المطلوبة
+                            if(v.max_qty <= 0) {
+                                v.is_in_stock = false;
+                            }
+                        }
+                    }
+                });
+                // إعادة تشغيل فحص الأزرار لتقفل التشكيلة التي نفدت فوراً أمام العميل وهو في صفحة النجاح
+                OPC.updateSwatchesStockStatus();
+            }
+
+        } else {
+            alert(r.data || 'حدث خطأ أثناء إرسال الطلب');
+            $btn.prop('disabled', false);
+            $('.qmc-btn-txt').show();
+            $('.qmc-btn-spin').hide();
         }
-    };
-    $(document).on('found_variation','form.variations_form',function(e,v){
-        $('#opc_variation_id').val(v.variation_id);
-        if(v.display_price){OPC.basePrice=parseFloat(v.display_price);OPC.updateTotals();}
+    }).fail(function(){
+        alert('فشل الاتصال بالسيرفر، يرجى المحاولة مرة أخرى');
+        $btn.prop('disabled', false);
+        $('.qmc-btn-txt').show();
+        $('.qmc-btn-spin').hide();
     });
-    $(document).on('reset_data','form.variations_form',function(){$('#opc_variation_id').val('');});
-    $(document).ready(function(){OPC.init();});
+}
+    };
+
+    $(document).ready(function(){ OPC.init(); });
 })(jQuery);
 </script>

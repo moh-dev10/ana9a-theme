@@ -6,8 +6,18 @@
     <?php
     // استدعاء ملف hero.php من داخل مجلد template-parts/home/
     get_template_part( 'template-parts/home/hero' );
+    
+    // استدعاء ملف scrolling-ticker.php من داخل مجلد template-parts/home/
+    get_template_part('template-parts/home/scrolling-ticker');
+
+    get_template_part('template-parts/home/bento-categories');
+
     // استدعاء قسم المنتجات الجديد
     get_template_part( 'template-parts/home/featured-products' );
+
+    // استدعاء قسم مميزات المتجر
+    get_template_part('template-parts/home/store-features');
+
     
     
     ?>

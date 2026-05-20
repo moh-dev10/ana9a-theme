@@ -1,41 +1,72 @@
 <?php
 /**
- * Product Card Component - Dynamic
+ * Product Card Component - 100% Arabic Blueprint
+ * Path: template-parts/woocommerce/product-card.php
  */
+
 global $product;
 
-// التأكد من أن المنتج موجود
-if (empty($product)) return;
+if ( empty( $product ) || ! $product->is_visible() ) {
+    return;
+}
 ?>
 
-<div class="group relative flex flex-col bg-white">
-    <div class="relative aspect-[3/4] overflow-hidden bg-brand-gray-100">
-        
-        <a href="<?php the_permalink(); ?>">
-            <?php echo woocommerce_get_product_thumbnail('woocommerce_single', ['class' => 'h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110']); ?>
+<article <?php wc_product_class( 'group relative flex flex-col gap-3 bg-white', $product ); ?>>
+    
+    <div class=" animate-scroll-reveal relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-gray-50 border border-gray-100">
+        <a href="<?php the_permalink(); ?>" class="block w-full h-full">
+            <?php 
+            echo woocommerce_get_product_thumbnail('full', [
+                'class' => 'w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500'
+            ]); 
+            ?>
         </a>
 
-        <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+        <?php if ( $product->is_on_sale() ) : ?>
+            <span class="absolute top-3 right-3 bg-black text-white text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-sm z-10">
+                تخفيض
+            </span>
+        <?php endif; ?>
+
+        <div class="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out hidden md:block z-10">
+            <a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="block w-full text-center bg-white/90 backdrop-blur-md text-black py-3 rounded-xl text-[11px] font-black tracking-wider uppercase hover:bg-black hover:text-white transition-colors shadow-sm">
+                + معاينة المنتج
+            </a>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-1.5 px-1">
+        
+        <?php 
+        $categories = wc_get_product_category_list($product->get_id(), ', ', '<span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">', '</span>');
+        if ( ! empty($categories) ) {
+            $cat_text = strip_tags($categories);
+            // إذا كان المنتج يتبع للتصنيف الافتراضي لووكومرس، نقوم بتعريبه في الـ Blueprint
+            if ( strtolower($cat_text) === 'uncategorized' ) {
+                $cat_text = 'عام';
+            }
+            echo '<span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">' . esc_html($cat_text) . '</span>';
+        }
+        ?>
+
+        <h2 class="text-sm font-medium text-gray-900 group-hover:text-black transition-colors leading-tight tracking-tight">
+            <a href="<?php the_permalink(); ?>">
+                <?php the_title(); ?>
+            </a>
+        </h2>
+        
+        <div class="flex items-center justify-between mt-0.5">
+            
+            <div dir="rtl" class="text-sm font-black text-black flex items-center gap-2  [&_del]:border-none [&_del]:text-gray-400 [&_del]:font-normal [&_ins]:no-underline [&_span]:no-underline">
+                <?php echo $product->get_price_html(); ?>
+            </div>
+
             <?php 
-                echo apply_filters( 'woocommerce_loop_add_to_cart_link',
-                    sprintf( '<a href="%s" rel="nofollow" data-product_id="%s" class="w-full bg-white text-brand-black py-3 text-[10px] font-bold uppercase tracking-widest text-center transition-transform duration-500 hover:bg-brand-black hover:text-white">%s</a>',
-                        esc_url( $product->add_to_cart_url() ),
-                        esc_attr( $product->get_id() ),
-                        esc_html( $product->add_to_cart_text() )
-                    ), $product ); 
+            if ( function_exists('display_product_color_swatches') ) {
+                display_product_color_swatches($product);
+            }
             ?>
         </div>
     </div>
 
-    <div class="py-4 flex flex-col gap-1">
-        <h3 class="text-[11px] font-medium uppercase tracking-wider text-brand-gray-600">
-            <?php echo wc_get_product_category_list($product->get_id()); ?>
-        </h3>
-        <a href="<?php the_permalink(); ?>" class="text-sm font-bold text-brand-black hover:opacity-70 transition-opacity">
-            <?php the_title(); ?>
-        </a>
-        <div class="flex items-center gap-3 mt-1 text-sm font-bold">
-            <?php echo $product->get_price_html(); ?>
-        </div>
-    </div>
-</div>
+</article>
