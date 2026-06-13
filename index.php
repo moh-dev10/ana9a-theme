@@ -12,6 +12,9 @@
 
     get_template_part('template-parts/home/bento-categories');
 
+    // استدعاء قسم السلايدر الخاص بالمنتجات
+    get_template_part('template-parts/home/carousel-product');
+
     // استدعاء قسم المنتجات الجديد
     get_template_part( 'template-parts/home/featured-products' );
 

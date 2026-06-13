@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Card Component - 100% Arabic Blueprint
+ * Product Card Component - 100% Arabic Blueprint (Tailwind Pure)
  * Path: template-parts/woocommerce/product-card.php
  */
 
@@ -11,9 +11,9 @@ if ( empty( $product ) || ! $product->is_visible() ) {
 }
 ?>
 
-<article <?php wc_product_class( 'group relative flex flex-col gap-3 bg-white', $product ); ?>>
+<article <?php wc_product_class( 'group relative flex flex-col gap-3 bg-brand-white product-card-item in-carousel-target', $product ); ?>>
     
-    <div class=" animate-scroll-reveal relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-gray-50 border border-gray-100">
+    <div class="animate-scroll-reveal relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-brand-gray-100 border border-brand-gray-100">
         <a href="<?php the_permalink(); ?>" class="block w-full h-full">
             <?php 
             echo woocommerce_get_product_thumbnail('full', [
@@ -23,42 +23,38 @@ if ( empty( $product ) || ! $product->is_visible() ) {
         </a>
 
         <?php if ( $product->is_on_sale() ) : ?>
-            <span class="absolute top-3 right-3 bg-black text-white text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-sm z-10">
-                تخفيض
+            <span class="absolute top-3 right-3 bg-brand-black text-brand-white text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-sm z-10 [.in-carousel_&]:hidden">
+                <?php _e('تخفيض', 'ana9a'); ?>
             </span>
         <?php endif; ?>
 
         <div class="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out hidden md:block z-10">
-            <a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="block w-full text-center bg-white/90 backdrop-blur-md text-black py-3 rounded-xl text-[11px] font-black tracking-wider uppercase hover:bg-black hover:text-white transition-colors shadow-sm">
-                + معاينة المنتج
+            <a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="block w-full text-center bg-brand-white/90 backdrop-blur-md text-brand-black py-3 rounded-xl text-[11px] font-black tracking-wider uppercase hover:bg-brand-black hover:text-brand-white transition-colors shadow-sm">
+                + <?php _e('معاينة المنتج', 'ana9a'); ?>
             </a>
         </div>
     </div>
 
-    <div class="flex flex-col gap-1.5 px-1">
+    <div class="flex flex-col gap-1.5 px-1 *:in-[.in-carousel]:gap-1 in-[.in-carousel]:text-center in-[.in-carousel]:items-center">
         
-        <?php 
-        $categories = wc_get_product_category_list($product->get_id(), ', ', '<span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">', '</span>');
-        if ( ! empty($categories) ) {
-            $cat_text = strip_tags($categories);
-            // إذا كان المنتج يتبع للتصنيف الافتراضي لووكومرس، نقوم بتعريبه في الـ Blueprint
-            if ( strtolower($cat_text) === 'uncategorized' ) {
-                $cat_text = 'عام';
-            }
-            echo '<span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">' . esc_html($cat_text) . '</span>';
-        }
-        ?>
+       <?php 
+       $categories = get_the_terms( $product->get_id(), 'product_cat' );
+       $filtered   = is_array($categories) ? array_filter( $categories, fn($c) => $c->slug !== 'uncategorized' ) : [];
+       if ( ! empty($filtered) ) {
+           $cat = reset($filtered);
+           echo '<span class="text-[11px] font-medium uppercase tracking-wider text-brand-gray-500 in-[.in-carousel]:hidden">' . esc_html( $cat->name ) . '</span>';
+       }
+       ?>
 
-        <h2 class="text-sm font-medium text-gray-900 group-hover:text-black transition-colors leading-tight tracking-tight">
+        <h2 class="text-sm font-medium text-brand-gray-800 group-hover:text-brand-black transition-colors leading-tight tracking-tight in-[.in-carousel]:text-[13px] in-[.in-carousel]:font-bold in-[.in-carousel]:text-center in-[.in-carousel]:tracking-widest">
             <a href="<?php the_permalink(); ?>">
                 <?php the_title(); ?>
             </a>
         </h2>
         
         <div class="flex items-center justify-between mt-0.5">
-            
-            <div dir="rtl" class="text-sm font-black text-black flex items-center gap-2  [&_del]:border-none [&_del]:text-gray-400 [&_del]:font-normal [&_ins]:no-underline [&_span]:no-underline">
-                <?php echo $product->get_price_html(); ?>
+            <div dir="rtl" class="text-sm font-black text-brand-black flex items-center gap-2 [&_del]:border-none [&_del]:text-brand-gray-500 [&_del]:font-normal [&_ins]:no-underline [&_span]:no-underline [.in-carousel_&_del]:hidden in-[.in-carousel]:text-[16px] in-[.in-carousel_&]:justify-center in-[.in-carousel_&]:w-full">
+               <?php echo $product->get_price_html(); ?>
             </div>
 
             <?php 
@@ -68,5 +64,4 @@ if ( empty( $product ) || ! $product->is_visible() ) {
             ?>
         </div>
     </div>
-
 </article>

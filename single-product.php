@@ -12,7 +12,7 @@
 
            
 
-            <nav class="flex mb-8 text-[10px] uppercase tracking-[0.2em] text-brand-gray-400">
+            <nav class="flex mb-8 text-[10px] uppercase tracking-[0.2em] text-brand-gray-500">
 
                 <a href="<?php echo home_url(); ?>" class="hover:text-brand-black transition-colors">الرئيسية</a>
 

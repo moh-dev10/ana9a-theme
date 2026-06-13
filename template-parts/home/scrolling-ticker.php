@@ -5,23 +5,31 @@
  */
 if (!defined('ABSPATH')) exit;
 
-// العبارات التسويقية التي ستتكرر في الشريط
-$ticker_text = __('توصيل سريع لـ 58 ولاية  •  الدفع عند الاستلام  •  خامات أصلية وفاخرة 100%  •  ارتقِ بأسلوبك الخاص مع أناقة • ', 'ana9a');
+$ticker_items = [
+    __('توصيل لـ 58 ولاية', 'ana9a'),
+    __('الدفع عند الاستلام', 'ana9a'),
+    __('سنيكرات — صنادل — بلايغ', 'ana9a'),
+    __('خامات أصلية 100%', 'ana9a'),
+    __('تشكيلة جديدة كل أسبوع', 'ana9a'),
+    __('مقاسات من 18 إلى 45', 'ana9a'),
+];
 ?>
 
-<div class="relative w-full overflow-hidden bg-black text-white py-4 border-y border-neutral-900 select-none pointer-events-none" dir="ltr">
+<!-- تم تغيير border-neutral-900 ليتماشى مع الـ brand-gray-800 -->
+<div class="relative w-full overflow-hidden bg-brand-black text-brand-white py-4 border-y border-brand-gray-800 select-none pointer-events-none" dir="ltr">
     
-    <div class="flex whitespace-nowrap w-max animate-[ticker_30s_linear_infinite]">
-        
-        <div class="flex items-center gap-12 px-6 text-xs font-black tracking-widest uppercase text-right" dir="rtl">
-            <span><?php echo $ticker_text; ?></span>
-            <span><?php echo $ticker_text; ?></span>
-        </div>
-        
-        <div class="flex items-center gap-12 px-6 text-xs font-black tracking-widest uppercase text-right" dir="rtl">
-            <span><?php echo $ticker_text; ?></span>
-            <span><?php echo $ticker_text; ?></span>
-        </div>
-
+    <!-- زدنا المدة لـ 30s لتكون الحركة ناعمة وفخمة -->
+    <div class="flex whitespace-nowrap w-max animate-[ticker_30s_linear_infinite] gap-12">
+        <?php for($i = 0; $i < 2; $i++): ?>
+            <div class="flex items-center gap-12" dir="rtl">
+                <?php foreach ($ticker_items as $item) : ?>
+                    <span class="text-xs font-black tracking-widest uppercase whitespace-nowrap">
+                        <?php echo esc_html($item); ?>
+                    </span>
+                    <!-- النقطة الفاصلة أصبحت تتبع لون brand-gray-200 لتعطي تباين أنيق -->
+                    <span class="w-1.5 h-1.5 bg-brand-gray-200 rounded-full"></span>
+                <?php endforeach; ?>
+            </div>
+        <?php endfor; ?>
     </div>
 </div>

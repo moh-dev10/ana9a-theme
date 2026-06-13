@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 get_header(); ?>
 
-<main class="max-w-[1440px] mx-auto px-4 py-12 md:py-16 text-right" dir="rtl">
+<main class="max-w-[1440px] mx-auto space-y-1 px-4 py-12 md:py-16 text-right" dir="rtl">
     
     <header class="mb-10 md:mb-16 flex flex-col md:flex-row-reverse md:items-end justify-between gap-4 border-b border-gray-100 pb-6">
         
@@ -18,8 +18,8 @@ get_header(); ?>
             <?php do_action( 'woocommerce_before_shop_loop' ); ?>
         </div>
 
-        <div class="order-1 md:order-2">
-            <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-black">
+        <div class="order-1 md:order-2 mt-4">
+            <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-brand-black">
                 
                 <?php
                  if ( is_shop() ) {
@@ -32,7 +32,8 @@ get_header(); ?>
                 ?>
             </h1>
             <p class="text-sm text-gray-500 mt-2">
-                <?php _e('اكتشف أحدث تشكيلات الملابس والأحذية الحصرية', 'ana9a'); ?>
+                <?php _e('سنيكرات، صنادل وبلايغ — أصلية 100% بتوصيل لكل الجزائر', 'ana9a');
+?>
             </p>
         </div>
 
@@ -58,7 +59,7 @@ get_header(); ?>
 
     <?php else : ?>
         
-        <div class="text-center py-20 bg-gray-50 rounded-3xl">
+        <div class="text-center py-20 bg-gray-50 rounded-2xl">
             <p class="text-gray-500 font-medium">
                 <?php _e('لم يتم العثور على أي منتجات حالياً في هذا القسم.', 'ana9a'); ?>
             </p>
